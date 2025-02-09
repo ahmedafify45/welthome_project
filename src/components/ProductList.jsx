@@ -7,15 +7,16 @@ import { toggleFavourite } from "../reduux/favouriteSlice";
 
 const ProductList = ({ products, selectedCategory = "All" }) => {
   const { type, propertyType, location } = useSelector((state) => state.search);
-
   const favourites = useSelector((state) => state.favourites.favourites);
   const dispatch = useDispatch();
   const [animation, setAnimation] = useState(false);
 
   // تصفية المنتجات بناءً على البحث
   const filteredProducts = useMemo(() => {
+    if (!products) return [];
+
     return products.filter((product) => {
-      const productAddress = product.location?.toLowerCase() || ""; // ✅ استخدم location بدلاً من address
+      const productAddress = product.location?.toLowerCase() || "";
       const searchLocation = location.trim().toLowerCase();
       const isMatching =
         searchLocation === "" || productAddress.includes(searchLocation);
@@ -42,13 +43,13 @@ const ProductList = ({ products, selectedCategory = "All" }) => {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   };
+
   return (
     <motion.section
       className="property-list !mt-20"
       aria-labelledby="property-label"
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
+      animate="visible"
     >
       <div className="container">
         <div className="!m-auto grid !grid-cols-1 sm:!grid-cols-2 md:!grid-cols-3 lg:!grid-cols-4 gap-[20px]">
@@ -62,14 +63,16 @@ const ProductList = ({ products, selectedCategory = "All" }) => {
                   className="card max-w-[350px] border border-gray-200 rounded-lg shadow-lg"
                   variants={cardVariants}
                   initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
+                  animate="visible"
                 >
                   <div className="card-banner">
                     <figure className="img-holder">
                       <img
                         src={product.image}
                         alt={product.name}
+                        loading="lazy"
+                        width="100%"
+                        height="auto"
                         className="img-cover rounded-t-lg"
                       />
                     </figure>
@@ -111,7 +114,7 @@ const ProductList = ({ products, selectedCategory = "All" }) => {
                     </h3>
 
                     <address className="body-medium card-text text-gray-500">
-                      {product.address}
+                      {product.description}
                     </address>
 
                     <div className="card-meta-list flex gap-4 mt-3">
