@@ -1,18 +1,21 @@
 /* eslint-disable react/prop-types */
-import { useMemo } from "react";
+import { useCallback } from "react";
 import { category_list } from "../assets/images/assets";
 
 const Category = ({ setCategory, selectedCategory, onCategoryClick }) => {
-  // استخدام useMemo لتخزين قائمة الفئات فقط عند التحميل الأول
-  const categories = useMemo(() => category_list, []);
+  // قائمة الفئات لا تحتاج إلى useMemo لأنها ثابتة
+  const categories = category_list;
 
-  // تخزين صور الفئات باستخدام useMemo
-  const categoryImages = useMemo(() => {
-    return categories.map((item) => ({
-      id: item.category_name,
-      image: item.category_image,
-    }));
-  }, [categories]);
+  // استخدام useCallback لمنع إعادة إنشاء الوظيفة عند كل تحديث
+  const handleCategoryClick = useCallback(
+    (categoryName) => {
+      const newCategory =
+        selectedCategory === categoryName ? "All" : categoryName;
+      setCategory(newCategory);
+      onCategoryClick(newCategory);
+    },
+    [selectedCategory, setCategory, onCategoryClick] // منع إعادة الإنشاء إلا عند تغيير هذه القيم
+  );
 
   return (
     <section className="!pt-5">
@@ -22,24 +25,13 @@ const Category = ({ setCategory, selectedCategory, onCategoryClick }) => {
         </h2>
 
         <div className="!flex !items-center !justify-between text-center !my-5 !mx-0 !gap-8 !overflow-x-scroll scrollbar">
-          {categories.map((item, index) => {
+          {categories.map((item) => {
             const isActive = selectedCategory === item.category_name;
-
-            const categoryImage = categoryImages.find(
-              (image) => image.id === item.category_name
-            );
 
             return (
               <div
-                key={index}
-                onClick={() => {
-                  const newCategory =
-                    selectedCategory === item.category_name
-                      ? "All"
-                      : item.category_name;
-                  setCategory(newCategory);
-                  onCategoryClick(newCategory);
-                }}
+                key={item.category_name}
+                onClick={() => handleCategoryClick(item.category_name)}
                 className="!cursor-pointer !text-center !my-5"
               >
                 <img
@@ -48,7 +40,7 @@ const Category = ({ setCategory, selectedCategory, onCategoryClick }) => {
                       ? "!border-[4px] !border-solid !border-[#1755b2] !p-1 !shadow-lg"
                       : ""
                   }`}
-                  src={categoryImage?.image}
+                  src={item.category_image}
                   alt={item.category_name}
                 />
                 <p
